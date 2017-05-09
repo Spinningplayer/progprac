@@ -1,0 +1,6 @@
+{
+"main": "./practicum 1/randomUser/",
+"scripts": {
+"start": "node ./practicum 1/randomUser/server.js"
+},
+}
