@@ -5,3 +5,5 @@ node_modules
 .idea
 # MacOS
 .DS_Store
+
+*.odt#
