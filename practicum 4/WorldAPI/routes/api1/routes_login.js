@@ -1,9 +1,9 @@
-/**
- * Created by thijs on 5/30/17.
- */
 var express = require('express');
 var router = express.Router();
 var database = require('../../db_user');
+var config = require('../../config.json');
+var moment = require('moment');
+var jwt = require('jwt-simple');
 
 router.get("*", function(req, res, next){
     var username = req.get("username") || 0;
@@ -20,10 +20,10 @@ router.get("*", function(req, res, next){
                      console.log("user " + username + " succesfully logged in.");
                      res.status(200);
                      res.contentType('application/json');
-                     res.json({"msg":"succesfully logged in."});
+                     res.json({"token":encodeToken(username)});
                  } else {
                      console.log("user " + username + " was not logged in.");
-                     res.status(401).json({"msg":"unauthorised log in"})
+                     res.status(401).json({"msg": "not logged in"})
                  }
             }
         }
@@ -39,6 +39,15 @@ var checkPass = function(rows, password) {
         console.log(rows[i].username + ", " + rows[i].password);
     }
     return false;
+}
+
+var encodeToken = function(username){
+    const payload = {
+        exp: moment().add(10, 'days').unix(),
+        iat: moment().unix(),
+        sub: username
+    };
+    return jwt.encode(payload, config.SECRETKEY);
 }
 
 module.exports = router;

@@ -3,6 +3,20 @@ var router = express.Router();
 var config = require('../../config.json');
 var path = require('path');
 var database = require('../../mysql');
+var jwt = require('jwt-simple');
+var moment = require('moment');
+
+router.all("*", function(req, res, next){
+    var token = req.get("token") || 0;
+    var username =req.get("username") || 0;
+    if (decodeToken(token, username)){
+        next();
+    } else {
+        res.status(401);
+        res.contentType('application/json');
+        res.json({"msg": "invalid token"});
+    }
+})
 
 router.get("/:number", function(req, res, next) {
     var number = parseInt(req.params.number) - 1 || 0;
@@ -89,5 +103,28 @@ router.get("*", function(req, res, next){
       }
   })
 })
+
+var decodeToken = function(token, username) {
+    try{
+        const payload = jwt.decode(token, config.SECRETKEY);
+
+        const now = moment().unix();
+
+        if(now > payload.exp) {
+            console.log("token has expired.");
+            return false;
+        } else {
+            return true;
+        }
+        if(username == payload.sub) {
+            return true;
+        } else {
+            return false;
+        }
+    } catch (err) {
+        console.log(err);
+        return false
+    }
+}
 
 module.exports = router;

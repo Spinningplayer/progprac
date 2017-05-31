@@ -2,7 +2,8 @@ var express = require('express');
 var router = express.Router();
 var path = require('path');
 var config = require('../config');
-var database = require('../mysql')
+var database = require('../mysql');
+var userDatabase = require('../db_user');
 
 router.use("/countries", require('./api1/routes_countries'));
 router.use("/city", require('./api1/routes_cities'));
@@ -25,6 +26,31 @@ router.get("/search?", function(req, res, next){
             }
         }
     )
+})
+
+router.get("/register", function(req, res, next){
+    var username = req.query.username;
+    var password = req.query.password;
+    console.log(username + ", " + password);
+    if(username != null && password != null) {
+        userDatabase.query(
+            "INSERT INTO user_creds (username, password) VALUES (?,?)",
+            [username, password],
+            function (err, rows, fields) {
+                if(err)
+                    res.status(400).json(err);
+                else {
+                    res.status(200);
+                    res.contentType('application/json');
+                    res.json({"msg": "username and password succesfully registered!"});
+                }
+            }
+        )
+    } else {
+        res.status(400);
+        res.contentType('application/json');
+        res.json({"msg": "username or password missing."});
+    }
 })
 
 module.exports = router;
